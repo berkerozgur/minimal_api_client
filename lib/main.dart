@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'views/initial_screen.dart';
+
 void main() {
   runApp(const App());
 }
@@ -10,11 +12,11 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Minimal API Client',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Placeholder(),
+      home: const InitialScreen(),
     );
   }
 }
