@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'api_service_impl.dart';
+import 'viewmodels/initial_viewmodel.dart';
 import 'views/initial_screen.dart';
 
 void main() {
-  runApp(const App());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => InitialViewModel(ApiServiceImpl()),
+      child: const App(),
+    ),
+  );
 }
 
 class App extends StatelessWidget {
@@ -11,6 +19,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// TODO: Add support for a default dark theme.
     return MaterialApp(
       title: 'Minimal API Client',
       theme: ThemeData(

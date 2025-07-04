@@ -1,52 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../api_service.dart';
+import '../viewmodels/initial_viewmodel.dart';
 
-class InitialScreen extends StatefulWidget {
+const initialText = 'Enter the URL and click Send to get a response';
+
+class InitialScreen extends StatelessWidget {
   const InitialScreen({super.key});
 
   @override
-  State<InitialScreen> createState() => _InitialScreenState();
-}
-
-class _InitialScreenState extends State<InitialScreen> {
-  late final TextEditingController _controller;
-  final _apiService = ApiService();
-  var _isLoading = false;
-  var _response = 'Enter the URL and click Send to get a response';
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _sendRequest() async {
-    // TODO: Validate the url
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      final response = await _apiService.fetchFormattedJson(_controller.text);
-      setState(() {
-        _response = response;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _response = 'Error: $e';
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<InitialViewModel>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Minimal API Client'),
@@ -61,7 +26,7 @@ class _InitialScreenState extends State<InitialScreen> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _controller,
+                    controller: viewModel.textController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Enter URL',
@@ -69,23 +34,72 @@ class _InitialScreenState extends State<InitialScreen> {
                   ),
                 ),
                 SizedBox(width: 8),
-                ElevatedButton(onPressed: _sendRequest, child: Text('Send')),
+                ElevatedButton(
+                  onPressed: viewModel.sendRequest,
+                  child: Text('Send'),
+                ),
               ],
             ),
             SizedBox(height: 8),
-            _isLoading
-                ? CircularProgressIndicator()
-                : Expanded(
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        _response,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  ),
+            Expanded(
+              child: Consumer<InitialViewModel>(
+                builder: (_, vm, __) {
+                  if (vm.response == null && !vm.isLoading) {
+                    return const Align(
+                      alignment: Alignment.center,
+                      child: Text(initialText),
+                    );
+                  }
+                  if (vm.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  // TODO: This solution isn't ideal. Fix it later
+                  if (vm.response!.contains('Invalid') ||
+                      vm.response!.contains('Error')) {
+                    return Align(
+                      alignment: Alignment.center,
+                      child: Text(vm.response!),
+                    );
+                  }
+                  return ResponseText(
+                    scrollController: vm.scrollController,
+                    response: vm.response!,
+                  );
+                },
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class ResponseText extends StatelessWidget {
+  const ResponseText({
+    super.key,
+    required this.scrollController,
+    required this.response,
+  });
+
+  final ScrollController scrollController;
+  final String response;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(minWidth: double.infinity),
+      child: Scrollbar(
+        controller: scrollController,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: SelectableText(
+            response,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+          ),
         ),
       ),
     );
