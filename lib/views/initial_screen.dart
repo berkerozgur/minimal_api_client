@@ -41,32 +41,30 @@ class InitialScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 8),
-            Expanded(
-              child: Consumer<InitialViewModel>(
-                builder: (_, vm, __) {
-                  if (vm.response == null && !vm.isLoading) {
-                    return const Align(
-                      alignment: Alignment.center,
-                      child: Text(initialText),
-                    );
-                  }
-                  if (vm.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  // TODO: This solution isn't ideal. Fix it later
-                  if (vm.response!.contains('Invalid') ||
-                      vm.response!.contains('Error')) {
-                    return Align(
-                      alignment: Alignment.center,
-                      child: Text(vm.response!),
-                    );
-                  }
-                  return ResponseText(
-                    scrollController: vm.scrollController,
-                    response: vm.response!,
+            Consumer<InitialViewModel>(
+              builder: (_, vm, __) {
+                if (vm.response == null && !vm.isLoading) {
+                  return const Align(
+                    alignment: Alignment.center,
+                    child: Text(initialText),
                   );
-                },
-              ),
+                }
+                if (vm.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                // TODO: This solution isn't ideal. Fix it later
+                if (vm.response!.contains('Invalid') ||
+                    vm.response!.contains('Error')) {
+                  return Align(
+                    alignment: Alignment.center,
+                    child: Text(vm.response!),
+                  );
+                }
+                return ResponseText(
+                  scrollController: vm.scrollController,
+                  response: vm.response!,
+                );
+              },
             ),
           ],
         ),
@@ -87,18 +85,20 @@ class ResponseText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(minWidth: double.infinity),
-      child: Scrollbar(
-        controller: scrollController,
-        thumbVisibility: true,
-        child: SingleChildScrollView(
+    return Expanded(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minWidth: double.infinity),
+        child: Scrollbar(
           controller: scrollController,
-          child: SelectableText(
-            response,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: SelectableText(
+              response,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+            ),
           ),
         ),
       ),
