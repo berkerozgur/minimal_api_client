@@ -4,8 +4,9 @@ import 'enums.dart';
 abstract class ApiService {
   Future<String> fetchFormattedJson(
     String url, {
+    HttpMethod method = HttpMethod.get,
+    Object? body,
     bool prettifiedJson = true,
-    HttpMethod method = HttpMethod.GET,
   });
 
   bool isUrlValid(String url);

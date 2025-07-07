@@ -9,15 +9,40 @@ class ApiServiceImpl implements ApiService {
   @override
   Future<String> fetchFormattedJson(
     String url, {
+    HttpMethod method = HttpMethod.get,
+    Object? body,
     bool prettifiedJson = true,
-    HttpMethod method = HttpMethod.GET,
   }) async {
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Accept': 'application/json'},
-    );
+    // TODO: Handle JSON format exceptions gracefully
+    http.Response? response;
 
-    if (response.statusCode == 200) {
+    switch (method) {
+      case HttpMethod.get:
+        response = await http.get(
+          Uri.parse(url),
+          headers: {'Accept': 'application/json'},
+        );
+      case HttpMethod.post:
+        final bodyText = body?.toString().trim();
+        final decoded = bodyText?.isEmpty ?? true ? {} : jsonDecode(bodyText!);
+        // final decoded = jsonDecode(body.toString());
+        response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(decoded),
+        );
+      case HttpMethod.put:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case HttpMethod.patch:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case HttpMethod.delete:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       final json = jsonDecode(response.body);
       if (prettifiedJson) {
         const encoder = JsonEncoder.withIndent('  '); // 2-space indentation
@@ -25,7 +50,7 @@ class ApiServiceImpl implements ApiService {
       }
       return json;
     } else {
-      return 'Error: ${response.statusCode}';
+      throw Exception('${response.statusCode}');
     }
   }
 
