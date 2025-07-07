@@ -15,6 +15,8 @@ class ApiServiceImpl implements ApiService {
   }) async {
     // TODO: Handle JSON format exceptions gracefully
     http.Response? response;
+    final bodyText = body?.toString().trim();
+    final decoded = bodyText?.isEmpty ?? true ? {} : jsonDecode(bodyText!);
 
     switch (method) {
       case HttpMethod.get:
@@ -23,23 +25,28 @@ class ApiServiceImpl implements ApiService {
           headers: {'Accept': 'application/json'},
         );
       case HttpMethod.post:
-        final bodyText = body?.toString().trim();
-        final decoded = bodyText?.isEmpty ?? true ? {} : jsonDecode(bodyText!);
-        // final decoded = jsonDecode(body.toString());
         response = await http.post(
           Uri.parse(url),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(decoded),
         );
       case HttpMethod.put:
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        response = await http.put(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(decoded),
+        );
       case HttpMethod.patch:
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        response = await http.patch(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(decoded),
+        );
       case HttpMethod.delete:
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        response = await http.delete(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+        );
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {

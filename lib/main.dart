@@ -33,8 +33,7 @@ class App extends StatelessWidget {
       title: 'Minimal API Client',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      // TODO: Change to ThemeMode.system later
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.system,
       home: const InitialScreen(),
     );
   }
